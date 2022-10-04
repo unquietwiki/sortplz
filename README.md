@@ -2,7 +2,7 @@
 
 _sortplz_ is a simple file sorter. It takes targeted files, and moves them to subdirectories for further review.
 
-**Usage:** sortplz -f _fromdir_ -t _todir_ -e _ext_
+**Usage:** sortplz -f:_fromdir_ -t:_todir_ -e:_ext_
 
 ## TODO
 

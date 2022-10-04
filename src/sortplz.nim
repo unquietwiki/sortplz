@@ -55,7 +55,7 @@ proc writeVersion() =
 
 proc writeHelp() =
   writeVersion()
-  echo "Usage: sortplz -f [fromdir] -t [todir] -e [ext]"
+  echo "Usage: sortplz -f:[fromdir] -t:[todir] -e:[ext]"
 
 # Parse command line
 for kind, key, val in getopt():
