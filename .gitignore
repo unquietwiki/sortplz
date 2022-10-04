@@ -1,4 +1,3 @@
-nimcache/
-sortplz*
 *.zip
-nakefile
+nimcache/
+bin/
