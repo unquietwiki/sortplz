@@ -25,7 +25,7 @@ installExt    = @["nim"]
 
 requires "nim >= 1.6.0"
 
-const compile = "nim c -d:release --outdir:bin"
+const compile = "nim c -d:release"
 const linux_x64 = "--cpu:amd64 --os:linux -o:sortplz"
 const windows_x64 = "--cpu:amd64 --os:windows -o:sortplz.exe"
 const macosx_x64 = "-o:sortplz"

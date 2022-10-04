@@ -7,7 +7,7 @@ Michael Adams, unquietwiki.com, 2022-10-03
 import
   std/os,
   std/parseopt,
-  std/strutils
+  std/sequtils
 
 # Config import
 include
@@ -29,61 +29,59 @@ var
 # Function to process & sort directory
 proc processDir(ext: string) =
 
-  # Temporary variables
-  var newdir: string = ""
+  echo "Processing extension: ", ext
 
   # Does the source directory exist?
-  if os.dirExists(fromdir) == false:
+  if not os.dirExists(fromdir):
     quit(1)
 
   # Does the destination directory exist?
-  if os.dirExists(todir) == false:
-    newdir = os.joinPath(todir, ext)
-    os.createDir(newdir)
+  var newdir: string = os.joinPath(todir, ext)
+  echo "Creating directory: ", newdir
+  os.createDir(newdir)
 
   # Process the list of files in the source directory
-  for kind, path in walkDir(fromdir, relative = false, checkDir = false):
-    if kind == pcFile:
-      if path.endsWith(ext):
-        os.moveFile(path, newdir)
+  var searchpath = os.joinPath(fromdir,"*." & ext)
+  echo "Moving files: ", searchpath, " to ", newdir
+  for f in toSeq(os.walkFiles(searchpath)):
+    echo "Moving file: ", os.lastPathPart(f)
+    os.moveFile(f, newdir & os.DirSep & os.lastPathPart(f))
 
 # Functions to display command line information
 proc writeVersion() =
   echo name, " ", version
   echo description
+  echo "Maintainer(s): ", author
 
 proc writeHelp() =
   writeVersion()
-  echo "Usage: sortplz -f [fromdir] -t [todir] [ext] ..."
+  echo "Usage: sortplz -f [fromdir] -t [todir] -e [ext]"
 
 # Parse command line
-var p = initOptParser(@["--fromdir:string","-f:string","--todir:string","-t:string","--help","-h","--version","-v"],
-  shortNoVal = {'h','v'}, longNoVal = @["help","version"])
-
-for kind, key, val in p.getopt():
+for kind, key, val in getopt():
   case kind
-  of cmdArgument:
-    echo "Loading extension: ", val
-    exts.add(val)
   of cmdLongOption, cmdShortOption:
     case key
+    of "ext", "e":
+      echo "Loading extension: ", val
+      exts.add(val)
     of "fromdir", "f":
-      if val != "": fromdir = val
-      break
+      if val.len > 0: fromdir = val
+      echo "Source directory: ", fromdir
     of "todir", "t":
-      if val != "": todir = val
-      break
+      if val.len > 0: todir = val
+      echo "Destination directory: ", todir
     of "help", "h":
       writeHelp()
       quit(0)
     of "version", "v":
       writeVersion()
       quit(0)
-  of cmdEnd: quit(0)
-  
-# debug
-echo "DEBUG:", p.remainingArgs()
-echo "DEBUG:", exts
+  of cmdArgument:
+    # TODO: there should be a list of extensions, vs -e
+    discard
+  of cmdEnd:
+    quit(0)
 
 # Act on provided extensions
 if exts.len < 1:
