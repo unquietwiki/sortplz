@@ -14,6 +14,7 @@ _sortplz_ is a simple file sorter. It takes targeted files, and moves them to su
 
 - 2022.10.04.2 -> Initial Release
 - 2022.10.04.3 -> Add colored output & partially-successful "silent" flag.
+- 2022.11.04.1 -> 
 
 ## TODO
 

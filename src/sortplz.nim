@@ -1,6 +1,6 @@
 #[
 sortplz: sort files into subdirectories, based on given criteria.
-Michael Adams, unquietwiki.com, 2022-10-03
+Michael Adams, unquietwiki.com, 2022-11-04
 ]#
 
 # Libraries
@@ -22,6 +22,7 @@ var
   todir = getCurrentDir()
   exts: seq[string]
   silent: bool = false
+  recurse: bool = false
 
 # Function to process & sort directory
 proc processDir(ext: string) =
@@ -40,14 +41,20 @@ proc processDir(ext: string) =
     stdout.styledWriteLine(fgYellow, "Creating directory: ", newdir)
   os.createDir(newdir)
 
-  # Process the list of files in the source directory
-  var searchpath = os.joinPath(fromdir,"*." & ext)
+  # Process the list of files in the source directory  
   if not silent:
-    stdout.styledWriteLine(fgCyan, "Moving files: ", searchpath, " to ", newdir)
-  for f in toSeq(os.walkFiles(searchpath)):
-    if not silent:
-      stdout.styledWriteLine(fgGreen, "Moving file: ", os.lastPathPart(f))    
-    os.moveFile(f, newdir & os.DirSep & os.lastPathPart(f))
+    stdout.styledWriteLine(fgCyan, "Moving files to ", newdir)
+  if not recurse:  
+    for f in toSeq(os.walkFiles(os.joinPath(fromdir,"*." & ext))):
+      if not silent:
+        stdout.styledWriteLine(fgGreen, "Moving file: ", os.lastPathPart(f))    
+      os.moveFile(f, newdir & os.DirSep & os.lastPathPart(f))
+  else:
+    for f in toSeq(os.walkDirRec(os.joinPath(fromdir))):
+      if f.splitFile.ext == "." & ext:
+        if not silent:
+          stdout.styledWriteLine(fgGreen, "Moving file: ", f.unixToNativePath())
+        os.moveFile(f, newdir & os.DirSep & os.lastPathPart(f))
 
 # Functions to display command line information
 proc writeVersion() =
@@ -60,16 +67,25 @@ proc writeVersion() =
 proc writeHelp() =
   writeVersion()
   stdout.styledWriteLine(fgGreen, "Usage: sortplz -f:[fromdir] -t:[todir] -e:[ext]")
-  stdout.styledWriteLine(fgYellow, "Other flags: --help (-h), --version (-v), --silent (-s)")
+  stdout.styledWriteLine(fgYellow, "Other flags: --recurse (-r) --help (-h), --version (-v), --silent (-s)")
   stdout.styledWriteLine(fg8Bit, "==============================================================")
-
-#stdout.styledWriteLine(fgYellow, )
 
 # Parse command line
 for kind, key, val in getopt():
   case kind
   of cmdLongOption, cmdShortOption:
     case key
+    of "silent", "s":
+      silent = true
+    of "recurse", "r":    
+      recurse = true
+      stdout.styledWriteLine(fgRed, "Recursion enabled!")
+    of "help", "h":
+      writeHelp()
+      quit(0)
+    of "version", "v":
+      writeVersion()
+      quit(0)
     of "ext", "e":
       if not silent:
         stdout.styledWriteLine(fgBlue, "Loading extension: ", val)
@@ -82,14 +98,6 @@ for kind, key, val in getopt():
       if val.len > 0: todir = val
       if not silent:
         stdout.styledWriteLine(fgYellow, "Destination directory: ", todir)
-    of "silent", "s":
-      silent = true
-    of "help", "h":
-      writeHelp()
-      quit(0)
-    of "version", "v":
-      writeVersion()
-      quit(0)
   of cmdArgument:
     # TODO: there should be a list of extensions, vs -e
     discard
