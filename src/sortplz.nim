@@ -1,10 +1,10 @@
 #[
 sortplz: sort files into subdirectories, based on given criteria.
-Michael Adams, unquietwiki.com, 2022-11-04
+Michael Adams, unquietwiki.com, 2022-11-13
 ]#
 
 # Libraries
-import std/[os, parseopt, sequtils, strutils, terminal]
+import std/[os, parseopt, strformat, strutils, terminal]
 
 # Config import (it's just variables)
 include config
@@ -59,10 +59,10 @@ proc processDirNameString(ns: string) =
 
   # Process the list of files in the source directory  
   if not recurse:  
-    for f in toSeq(os.walkFiles(os.joinPath(fromdir))):
+    for f in os.walkFiles(fromdir):
       moveThisFile(f, newdir)
   else:
-    for f in toSeq(os.walkDirRec(os.joinPath(fromdir))):
+    for f in os.walkDirRec(fromdir):
       if f.contains(ns):
         moveThisFile(f, newdir)
 
@@ -76,10 +76,10 @@ proc processDirExt(ext: string) =
 
   # Process the list of files in the source directory  
   if not recurse:  
-    for f in toSeq(os.walkFiles(os.joinPath(fromdir,"*." & ext))):
+    for f in os.walkFiles(fromdir / fmt"*.{ext}"):
       moveThisFile(f, newdir)
   else:
-    for f in toSeq(os.walkDirRec(os.joinPath(fromdir))):
+    for f in os.walkDirRec(fromdir):
       if f.splitFile.ext == "." & ext:
         moveThisFile(f, newdir)
 
