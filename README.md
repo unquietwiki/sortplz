@@ -20,6 +20,7 @@ _sortplz_ is a simple file sorter. It takes targeted files, and moves them to su
 - 2022.10.04.3 -> Added colored output & partially-successful "silent" flag.
 - 2022.11.04.1 -> Added recursion; added name-string sorting; "silent" issues may be fixed?
 - 2022.11.13.1 -> Fixes from Nim Discord community.
+- 2022.12.13.1 -> Attempted bugfixes
 
 ## TODO
 
