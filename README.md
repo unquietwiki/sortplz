@@ -6,7 +6,7 @@ _sortplz_ is a simple file sorter. It takes targeted files, and moves them to su
 
 **Usage:** sortplz -f:_fromdir_ -t:_todir_ -e:_ext_ -n:_name_
 
-**Other flags:** _--help (-h)_, _--version (-v)_, _--silent (-s)_, _--recurse (-s)_
+**Other flags:** _--help (-h)_, _--colors (-c)_, _--version (-v)_, _--silent (-s)_, _--recurse (-s)_
 
 ## Notes
 
@@ -21,6 +21,7 @@ _sortplz_ is a simple file sorter. It takes targeted files, and moves them to su
 - 2022.11.04.1 -> Added recursion; added name-string sorting; "silent" issues may be fixed?
 - 2022.11.13.1 -> Fixes from Nim Discord community.
 - 2022.12.13.1 -> Attempted bugfixes
+- 2022.12.30.1 -> Colors default to off; add "colors" flag.
 
 ## TODO
 
