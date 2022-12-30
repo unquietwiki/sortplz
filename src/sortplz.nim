@@ -32,28 +32,37 @@ template unless(a:bool, body: varargs[untyped]): untyped =
     block:
       body
 
+# Color & plain line-writer
+template lineWriter(fg: ForegroundColor, text: string) =
+  if (colors):
+    block:
+      stdout.styledWriteLine(fg, text)
+  else:
+    block:
+      stdout.writeLine(text)
+
 # === Function to handle file moves ===
 proc moveThisFile(f: string, newdir: string) =
   unless silent:
-    stdout.styledWriteLine(fgGreen, "Moving file: " & f.unixToNativePath())
+    lineWriter(fgGreen, "Moving file: " & f.unixToNativePath())
   os.moveFile(f, newdir & os.DirSep & os.lastPathPart(f))
 
 # === Function to handle directory moves ===
 proc dirProc(value: string): string =
   # Does the source directory exist?
   unless os.dirExists(fromdir):
-    stdout.styledWriteLine(fgRed, "Failed to find source directory: " & fromdir)
+    lineWriter(fgRed, "Failed to find source directory: " & fromdir)
     quit(1)
 
   # Does the destination directory exist?
   var newdir: string = os.joinPath(todir, value)
   unless silent:
-    stdout.styledWriteLine(fgYellow, "Creating directory: " & newdir)
+    lineWriter(fgYellow, "Creating directory: " & newdir)
   os.createDir(newdir)
 
   # Return newdir as a value for the calling procs to use
   unless silent:
-    stdout.styledWriteLine(fgCyan, "Moving files to " & newdir)
+    lineWriter(fgCyan, "Moving files to " & newdir)
   return newdir
 
 # === Function to process & sort directory by name-strings ===
@@ -61,7 +70,7 @@ proc processDirNameString(ns: string) =
 
   # prepare the destination directory
   unless silent:
-    stdout.styledWriteLine(fgCyan, "Processing name-string: " & ns)
+    lineWriter(fgCyan, "Processing name-string: " & ns)
   var newdir = dirProc(ns)
 
   # Process the list of files in the source directory  
@@ -78,7 +87,7 @@ proc processDirExt(ext: string) =
 
   # prepare the destination directory
   unless silent:
-    stdout.styledWriteLine(fgCyan, "Processing extension: " & ext)
+    lineWriter(fgCyan, "Processing extension: " & ext)
   var newdir = dirProc(ext)
 
   # Process the list of files in the source directory  
@@ -92,17 +101,17 @@ proc processDirExt(ext: string) =
 
 # === Functions to display command line information ===
 proc writeVersion() =
-  stdout.styledWriteLine(fg8Bit, "==============================================================")
-  stdout.styledWriteLine(fgBlue, name & " " & version)
-  stdout.styledWriteLine(fgMagenta, description)
-  stdout.styledWriteLine(fgCyan, "Maintainer(s): " & author)
-  stdout.styledWriteLine(fg8Bit, "==============================================================")
+  lineWriter(fg8Bit, "==============================================================")
+  lineWriter(fgBlue, name & " " & version)
+  lineWriter(fgMagenta, description)
+  lineWriter(fgCyan, "Maintainer(s): " & author)
+  lineWriter(fg8Bit, "==============================================================")
 
 proc writeHelp() =
   writeVersion()
-  stdout.styledWriteLine(fgGreen, "Usage: sortplz -f:[fromdir] -t:[todir] -e:[ext] -n:[name]")
-  stdout.styledWriteLine(fgYellow, "Other flags: --recurse (-r) --help (-h), --version (-v), --silent (-s)")
-  stdout.styledWriteLine(fg8Bit, "==============================================================")
+  lineWriter(fgGreen, "Usage: sortplz -f:[fromdir] -t:[todir] -e:[ext] -n:[name]")
+  lineWriter(fgYellow, "Other flags: --colors (-c), --recurse (-r), --help (-h), --version (-v), --silent (-s)")
+  lineWriter(fg8Bit, "==============================================================")
 
 # === Parse command line ===
 for kind, key, val in getopt():
@@ -112,12 +121,11 @@ for kind, key, val in getopt():
     of "silent", "s":
       silent = true
     of "colors", "c":
-      # TODO: we need a template / macro to use this
       colors = true
     of "recurse", "r":    
       recurse = true
       unless silent:
-        stdout.styledWriteLine(fgRed, "Recursion enabled!")
+        lineWriter(fgRed, "Recursion enabled!")
     of "help", "h":
       writeHelp()
       quit(0)
@@ -126,20 +134,20 @@ for kind, key, val in getopt():
       quit(0)
     of "ext", "e":
       unless silent:
-        stdout.styledWriteLine(fgBlue, "Loading extension: " & val)
+        lineWriter(fgBlue, "Loading extension: " & val)
       exts.add(val)
     of "name", "n":
       unless silent:
-        stdout.styledWriteLine(fgBlue, "Considering name-string: " & val)
+        lineWriter(fgBlue, "Considering name-string: " & val)
       names.add(val)
     of "fromdir", "f":
       if val.len > 0: fromdir = val
       unless silent:
-        stdout.styledWriteLine(fgCyan, "Source directory: " & fromdir)
+        lineWriter(fgCyan, "Source directory: " & fromdir)
     of "todir", "t":
       if val.len > 0: todir = val
       unless silent:
-        stdout.styledWriteLine(fgYellow, "Destination directory: " & todir)
+        lineWriter(fgYellow, "Destination directory: " & todir)
   of cmdArgument:
     # TODO: there should be a list of extensions, vs -e
     discard
@@ -148,7 +156,7 @@ for kind, key, val in getopt():
 
 # Act on provided extensions
 if exts.len < 1 and names.len < 1:
-  stdout.styledWriteLine(fgRed, "No extensions or name-strings provided!")
+  lineWriter(fgRed, "No extensions or name-strings provided!")
   writeHelp()
   quit(0)
 else:
