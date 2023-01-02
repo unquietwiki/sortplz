@@ -22,6 +22,7 @@ _sortplz_ is a simple file sorter. It takes targeted files, and moves them to su
 - 2022.11.13.1 -> Fixes from Nim Discord community.
 - 2022.12.13.1 -> Attempted bugfixes
 - 2022.12.30.1 -> Colors default to off; add "colors" flag.
+- 2023.01.01.1 -> Implement "Tiffany" template language in code.
 
 ## TODO
 
