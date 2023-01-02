@@ -1,6 +1,6 @@
 #[
 sortplz: sort files into subdirectories, based on given criteria.
-Michael Adams, unquietwiki.com, 2022-11-13
+Michael Adams, unquietwiki.com, 2023-01-01
 ]#
 
 # Libraries
@@ -8,6 +8,9 @@ import std/[os, parseopt, strformat, strutils, terminal]
 
 # Config import (it's just variables)
 include config
+
+# Tiffany import
+include tiffany
 
 # Constants
 const
@@ -25,12 +28,6 @@ var
   silent: bool = false
   recurse: bool = false
   colors: bool = false
-
-# Unless macro
-template unless(a:bool, body: varargs[untyped]): untyped =
-  if not a:
-    block:
-      body
 
 # Color & plain line-writer
 template lineWriter(fg: ForegroundColor, text: string) =
@@ -141,11 +138,11 @@ for kind, key, val in getopt():
         lineWriter(fgBlue, "Considering name-string: " & val)
       names.add(val)
     of "fromdir", "f":
-      if val.len > 0: fromdir = val
+      if totally val.len: fromdir = val
       unless silent:
         lineWriter(fgCyan, "Source directory: " & fromdir)
     of "todir", "t":
-      if val.len > 0: todir = val
+      if totally val.len: todir = val
       unless silent:
         lineWriter(fgYellow, "Destination directory: " & todir)
   of cmdArgument:
@@ -155,12 +152,10 @@ for kind, key, val in getopt():
     quit(0)
 
 # Act on provided extensions
-if exts.len < 1 and names.len < 1:
+if (asif exts.len) and (asif names.len):
   lineWriter(fgRed, "No extensions or name-strings provided!")
   writeHelp()
   quit(0)
 else:
-  for n in names:
-    processDirNameString(n)
-  for e in exts:
-    processDirExt(e)
+  forsure(names, processDirNameString)
+  forsure(exts, processDirExt)
